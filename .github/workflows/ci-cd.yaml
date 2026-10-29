@@ -22,6 +22,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
+          # Keep this the same major version as the Dockerfile (node:22-alpine)
           node-version: 26
           cache: npm
           cache-dependency-path: app/package-lock.json
@@ -51,6 +52,9 @@ jobs:
           echo "sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
           echo "time=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
+      # QEMU lets the amd64 runner build the arm64 image (for Apple Silicon Macs)
+      - uses: docker/setup-qemu-action@v3
+
       - uses: docker/setup-buildx-action@v3
 
       # Build once and load it locally so it can be scanned BEFORE any push
@@ -69,7 +73,7 @@ jobs:
 
       # Security gate: the pipeline fails if a fixable CRITICAL vulnerability exists
       - name: Scan image with Trivy
-        uses: aquasecurity/trivy-action@0.35.0
+        uses: aquasecurity/trivy-action@v0.35.0
         with:
           image-ref: ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.sha }}
           severity: CRITICAL
@@ -90,6 +94,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: app
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: |
             ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.sha }}
