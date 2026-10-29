@@ -1,0 +1,12 @@
+# Configuration lives outside the image. Change a value here, apply it, restart
+# the rollout, and the UI shows the new value without rebuilding anything.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nextjs-devops-config
+  namespace: devops-demo
+data:
+  APP_ENV: "minikube-dev"
+  WELCOME_MESSAGE: "Hello from a ConfigMap"
+  # Enables the Crash / Readiness demo buttons. NEVER enable in real production.
+  ENABLE_CHAOS: "true"

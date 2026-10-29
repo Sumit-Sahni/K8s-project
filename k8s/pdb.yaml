@@ -1,0 +1,11 @@
+# During voluntary disruptions (node drain, upgrades) keep at least 2 pods up.
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: nextjs-devops
+  namespace: devops-demo
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nextjs-devops

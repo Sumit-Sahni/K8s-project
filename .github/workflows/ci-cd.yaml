@@ -1,0 +1,129 @@
+name: ci-cd-pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  IMAGE_NAME: nextjs-devops
+
+jobs:
+  # ---------------------------------------------------------------
+  # 1. Install, type-check and build the Next.js app
+  # ---------------------------------------------------------------
+  build-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - run: npm ci
+      - run: npm run build
+
+  # ---------------------------------------------------------------
+  # 2. Build the image, scan it, and (on main) push it to GHCR
+  # ---------------------------------------------------------------
+  docker:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
+      sha: ${{ steps.meta.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compute image name and tag
+        id: meta
+        run: |
+          owner="${GITHUB_REPOSITORY_OWNER,,}"   # GHCR needs lowercase
+          echo "image=ghcr.io/${owner}/${IMAGE_NAME}" >> "$GITHUB_OUTPUT"
+          echo "sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "time=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      # Build once and load it locally so it can be scanned BEFORE any push
+      - name: Build image (local, for scanning)
+        uses: docker/build-push-action@v6
+        with:
+          context: app
+          load: true
+          tags: ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.sha }}
+          build-args: |
+            APP_VERSION=${{ steps.meta.outputs.sha }}
+            GIT_SHA=${{ github.sha }}
+            BUILD_TIME=${{ steps.meta.outputs.time }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Security gate: the pipeline fails if a fixable CRITICAL vulnerability exists
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.sha }}
+          severity: CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+          format: table
+
+      - name: Log in to GHCR
+        if: github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push image
+        if: github.event_name == 'push'
+        uses: docker/build-push-action@v6
+        with:
+          context: app
+          push: true
+          tags: |
+            ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.sha }}
+            ${{ steps.meta.outputs.image }}:latest
+          build-args: |
+            APP_VERSION=${{ steps.meta.outputs.sha }}
+            GIT_SHA=${{ github.sha }}
+            BUILD_TIME=${{ steps.meta.outputs.time }}
+          cache-from: type=gha
+
+  # ---------------------------------------------------------------
+  # 3. CD: write the new image tag into Git. Argo CD sees the commit
+  #    and rolls the new version out to the cluster (GitOps).
+  # ---------------------------------------------------------------
+  update-manifest:
+    if: github.event_name == 'push'
+    needs: docker
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Point kustomization at the new image
+        run: |
+          sed -i "s|newName: .*|newName: ${{ needs.docker.outputs.image }}|" k8s/kustomization.yaml
+          sed -i "s|newTag: .*|newTag: ${{ needs.docker.outputs.sha }}|" k8s/kustomization.yaml
+          cat k8s/kustomization.yaml
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add k8s/kustomization.yaml
+          git diff --cached --quiet && echo "No change" && exit 0
+          git commit -m "chore(deploy): ${{ needs.docker.outputs.sha }} [skip ci]"
+          git push

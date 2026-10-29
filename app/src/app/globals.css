@@ -1,0 +1,86 @@
+:root {
+  --bg: #0b1220;
+  --panel: #131c2e;
+  --panel-2: #18233a;
+  --border: #243250;
+  --text: #e6edf7;
+  --muted: #8fa0bd;
+  --blue: #4da3ff;
+  --green: #34d399;
+  --red: #f87171;
+  --amber: #fbbf24;
+  --violet: #a78bfa;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+}
+
+code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+.wrap { max-width: 1100px; margin: 0 auto; padding: 32px 20px 64px; }
+
+.header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.header h1 { margin: 0; font-size: 28px; }
+.sub { color: var(--muted); margin: 0 0 28px; }
+
+.badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; border: 1px solid var(--border); background: var(--panel); }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); }
+.dot.ok { background: var(--green); box-shadow: 0 0 8px var(--green); }
+.dot.bad { background: var(--red); box-shadow: 0 0 8px var(--red); }
+.dot.warn { background: var(--amber); }
+
+.grid { display: grid; gap: 14px; }
+.stats { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 22px; }
+.two { grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); margin-bottom: 22px; }
+@media (max-width: 520px) { .two { grid-template-columns: 1fr; } }
+
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; }
+.card h2 { margin: 0 0 4px; font-size: 16px; }
+.card .hint { color: var(--muted); font-size: 13px; margin: 0 0 14px; }
+
+.stat .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+.stat .value { font-size: 18px; font-weight: 600; margin-top: 4px; word-break: break-all; }
+.stat .note { color: var(--muted); font-size: 12px; margin-top: 2px; }
+
+.btn { cursor: pointer; border: 1px solid var(--border); background: var(--panel-2); color: var(--text); border-radius: 8px; padding: 9px 14px; font-size: 14px; font-weight: 600; }
+.btn:hover { border-color: var(--blue); }
+.btn.danger { border-color: #7f2d2d; color: #fecaca; background: #2a1518; }
+.btn.danger:hover { border-color: var(--red); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btns { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+
+/* Load balancing bars */
+.bar-row { margin-bottom: 10px; }
+.bar-top { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px; }
+.bar { height: 10px; background: var(--panel-2); border-radius: 6px; overflow: hidden; }
+.bar > span { display: block; height: 100%; background: linear-gradient(90deg, var(--blue), var(--violet)); transition: width .3s; }
+
+/* Event log */
+.log { max-height: 220px; overflow-y: auto; font-size: 13px; background: #0d1626; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.log div { padding: 2px 0; }
+.log .t { color: var(--muted); margin-right: 8px; }
+.log .warn { color: var(--amber); }
+.log .good { color: var(--green); }
+.log .bad { color: var(--red); }
+.empty { color: var(--muted); font-size: 13px; }
+
+/* Pipeline */
+.pipeline { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
+.step { flex: 1 1 150px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; position: relative; }
+.step .n { color: var(--blue); font-size: 12px; font-weight: 700; }
+.step .name { font-weight: 600; font-size: 14px; }
+.step .tool { color: var(--muted); font-size: 12px; }
+.step.live { border-color: var(--green); }
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+td { padding: 6px 0; border-bottom: 1px solid var(--border); vertical-align: top; }
+td:first-child { color: var(--muted); width: 38%; padding-right: 10px; }
+
+.footer { color: var(--muted); font-size: 12px; margin-top: 28px; text-align: center; }

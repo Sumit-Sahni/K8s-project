@@ -1,0 +1,24 @@
+# GitOps: Argo CD watches the k8s/ folder in your Git repo and makes the
+# cluster match it. Nobody runs kubectl apply by hand.
+#
+# Before applying, replace REPLACE_ME_GITHUB_USER with your GitHub username.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nextjs-devops
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/REPLACE_ME_GITHUB_USER/nextjs-devops.git
+    targetRevision: main
+    path: k8s
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: devops-demo
+  syncPolicy:
+    automated:
+      prune: true      # delete resources removed from Git
+      selfHeal: true   # undo manual changes made with kubectl
+    syncOptions:
+      - CreateNamespace=true
