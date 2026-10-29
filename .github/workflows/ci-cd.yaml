@@ -69,7 +69,7 @@ jobs:
 
       # Security gate: the pipeline fails if a fixable CRITICAL vulnerability exists
       - name: Scan image with Trivy
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@0.35.0
         with:
           image-ref: ${{ steps.meta.outputs.image }}:${{ steps.meta.outputs.sha }}
           severity: CRITICAL
