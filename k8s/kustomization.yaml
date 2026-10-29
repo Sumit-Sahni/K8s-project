@@ -14,5 +14,5 @@ resources:
 # GitHub Container Registry image and the commit SHA, then Argo CD deploys it.
 images:
   - name: nextjs-devops
-    newName: nextjs-devops
-    newTag: local
+    newName: ghcr.io/sumit-sahni/nextjs-devops
+    newTag: 024c3f8
