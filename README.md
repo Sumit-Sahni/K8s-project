@@ -211,3 +211,7 @@ minikube stop
   and drift is corrected automatically.
 - **Honest limits:** this is a demo. The chaos endpoints must never exist in production, a real
   setup would add ingress with TLS, secrets management, and monitoring.
+
+
+  <img width="1231" height="953" alt="Screenshot 2026-10-29 at 12 54 53 PM" src="https://github.com/user-attachments/assets/bb5674e3-371c-427c-8451-f8f33691c325" />
+
