@@ -15,4 +15,4 @@ resources:
 images:
   - name: nextjs-devops
     newName: ghcr.io/sumit-sahni/nextjs-devops
-    newTag: e44080f
+    newTag: 4813692
