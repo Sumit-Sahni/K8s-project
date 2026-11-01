@@ -6,6 +6,10 @@ when you crash a pod, and which Git commit the CI/CD pipeline deployed.
 
 No Prometheus, no Grafana, no cloud account. Everything runs free on your laptop with minikube.
 
+
+  <img width="1231" height="953" alt="Screenshot 2026-10-29 at 12 54 53 PM" src="https://github.com/user-attachments/assets/bb5674e3-371c-427c-8451-f8f33691c325" />
+  
+
 ## Architecture
 
 ```mermaid
@@ -213,5 +217,4 @@ minikube stop
   setup would add ingress with TLS, secrets management, and monitoring.
 
 
-  <img width="1231" height="953" alt="Screenshot 2026-10-29 at 12 54 53 PM" src="https://github.com/user-attachments/assets/bb5674e3-371c-427c-8451-f8f33691c325" />
 
